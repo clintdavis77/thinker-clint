@@ -49,6 +49,7 @@ const int ColorMagenta = 253;
 const int ColorCyan = 254;
 const int ColorWhite = 255;
 
+void extend_pracx_zoom();
 bool shift_key_down();
 bool ctrl_key_down();
 bool alt_key_down();

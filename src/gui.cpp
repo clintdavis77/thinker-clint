@@ -557,6 +557,8 @@ LRESULT WINAPI ModWinProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     POINT p;
     MAP* sq;
 
+    extend_pracx_zoom();
+
     if (msg == WM_ACTIVATEAPP && conf.auto_minimise && !conf.reduced_mode) {
         if (!LOWORD(wParam)) {
             //If window has just become inactive e.g. ALT+TAB

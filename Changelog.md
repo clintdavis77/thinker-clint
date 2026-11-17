@@ -1,6 +1,9 @@
 
 # Thinker mod release changelog
 
+## Version 5.7 (2026-11-17)
+* Add a seventh map zoom level when running with PRACX, inserted between the existing levels 2 and 3 while leaving the other levels unchanged.
+
 ## Version 5.6 (2026-11-17)
 * Add a third unit special-ability slot unlocked by Mind/Machine Interface after Neural Grafting, configurable with `third_ability_tech`.
 * Add a numbered third-ability selector and preview in the Design Workshop without changing unit or savegame layouts.

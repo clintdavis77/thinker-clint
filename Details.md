@@ -417,6 +417,8 @@ If any issues are encountered, first check if they occur with the original game 
 * Video mode and window size config options.
 * Smooth scrolling config option.
 
+When PRACX is active, Thinker adds one extra map zoom level between PRACX's zoom levels 2 and 3. The other six levels remain at the scales provided by PRACX, so the new level gives an intermediate view when level 2 is too far out and level 3 is too close. This applies to both the native zoom keys and the mouse wheel.
+
 Scient's patch is already included in the Thinker binary and does not need any additional installation steps from the user. Optionally it is possible to install the modified txt files provided by Scient's patch. 
 Any other mod that uses a custom patched binary not listed here is not supported while running Thinker. Using any other binaries may prevent the game from starting if any of Thinker's startup checks fail because of an incompatible version.
 

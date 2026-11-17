@@ -162,6 +162,7 @@
 		<Unit filename="src/veh_turn.h" />
 		<Unit filename="src/workshop.cpp" />
 		<Unit filename="src/workshop.h" />
+		<Unit filename="src/zoom.cpp" />
 		<Extensions>
 			<lib_finder disable_auto="1" />
 		</Extensions>
