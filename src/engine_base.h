@@ -84,7 +84,7 @@ enum BaseGovernor {
     GOV_PRIORITY_DISCOVER = 0x2000000,
     GOV_PRIORITY_BUILD = 0x4000000,
     GOV_PRIORITY_CONQUER = 0x8000000,
-    GOV_UNK_10000000 = 0x10000000, // maybe unused
+    GOV_PRIORITY_FACILITIES = 0x10000000, // Thinker variable: produce only base facilities
     GOV_UNK_20000000 = 0x20000000, // maybe unused
     GOV_UNK_40000000 = 0x40000000, // used on lowest difficulty
     GOV_ACTIVE = 0x80000000,
@@ -112,6 +112,7 @@ const uint32_t BaseGovOptions[][2] = {
     {0x40000, GOV_MAY_FORCE_PSYCH},
     {0x80000, GOV_MAY_PROD_SP},
     {0x100000, GOV_MAY_HURRY_PRODUCTION},
+    {0x200000, GOV_PRIORITY_FACILITIES},
 };
 
 const int32_t BaseSupportCosts[8][2]  = {

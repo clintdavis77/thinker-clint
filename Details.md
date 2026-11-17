@@ -11,6 +11,8 @@ For the most complete list of all features provided by this mod, refer to both t
 
 Thinker uses a compatible savegame format with the original game unless `modify_unit_limit` is enabled and the unit count exceeds the previous limit. In this case the savegame cannot be opened with the original game due to engine limitations. None of the other Thinker config options are preserved in the savegame either, but the units or resources spawned at the game start will remain.
 
+This fork also supports three special abilities per unit. The existing ability bitmask is saved without any format changes, but editing three-ability designs requires this version of Thinker: the original Workshop may discard extra abilities. Keep the same `third_ability_tech` setting when continuing a game, and use the same mod version and setting on every multiplayer machine.
+
 Note that in `thinker.ini` config file, for binary settings **only zero values are treated as disabled**, any non-zero value usually enables the option. Whenever Thinker options are changed in the user interface, they are also saved to `thinker.ini` in the game folder.
 
 
@@ -34,6 +36,10 @@ Keyboard shortcuts
 
 User interface additions
 ========================
+**Third special ability:** Neural Grafting still unlocks the second slot. Mind/Machine Interface (which directly requires Neural Grafting in the standard tech tree) now also unlocks a third. The Workshop splits the second special-ability panel into numbered rows **2** and **3**. Click row 3 to select or remove its ability using the normal picker; right-click a locked row to see its technology requirement. Existing ability prerequisites, component restrictions, mutually exclusive Carrier/Deep Pressure Hull choices, and mineral costs still apply. A third slot does not grant any new ability for free.
+
+`third_ability_tech=41` chooses Mind/Machine Interface; `-1` disables the extension and restores the original Workshop. Other zero-based technology IDs can be used with custom tech trees. Both the configured technology and the rules-file two-ability prerequisite must be known. Existing saves gain access immediately if those technologies are already researched; existing units are not automatically given a third ability.
+
 Thinker's in-game menu shows the mod version information and provides statistics about the factions and spent game time if a game is loaded. In addition, some Thinker config options can be adjusted from its sub menu. When the game is in the main menu, it is also possible to adjust Special Scenario Rules for new random maps started from there. Selecting any special rules will override all rules even when starting a new scenario, so leave all the choices in the dialog empty to use preset scenario rules.
 
 Statistics feature calculates mineral and energy production numbers after multiplier facility effects are applied. However the mineral output bonus provided by Space Elevator is ignored in this step. Energy calculation also does not subtract inefficiency from the final number.
@@ -71,6 +77,8 @@ Base garrisoning priorities are also handled entirely by Thinker which tries to 
 
 Thinker base production AI will also decide every item that is produced in a base. The build order can differ substantially from anything the normal AIs might decide to produce, and the difference can be easily noted in the vastly increased quantity of formers and crawlers the AIs might have. Design units feature will introduce custom probe teams, armored crawlers, gravship formers, and AAA garrison prototypes for the AI factions. Normally these prototypes are not created by the game engine.
 
+With `design_units=1`, the AI uses the same researched ability-slot limit as the player. Three-slot designs include additional defensive abilities for garrisons (retaining police/morale checks), Deep Radar for long-range artillery ships already carrying AAA, Fuel Nanocells for radar-equipped interceptors on distant/naval fronts, and Clean Reactor for Super/Fungicidal land formers when support is not free. Production scoring weighs useful extra range and abilities against mineral cost. When the third-slot extension is enabled, the engine compares complete ability masks instead of ignoring some differences when reusing prototypes; this prevents requested three-ability designs from being silently replaced by older designs.
+
 Base hurry feature is able to use AI energy reserves to occasionally hurry base production. Items that can be hurried include most basic facilities, formers, combat units, and sometimes secret projects. The amount of credits spent on rushing projects depends on difficulty level. When a project has been rushed, it will be displayed in a popup if the player has a commlink for the faction. This works even during sunspots.
 
 Social AI feature will decide the social engineering models the AI factions will choose. It will attempt to take into account the various cumulative/non-linear effects of the society models and any bonuses provided by the secret projects. The AI is now capable of pop-booming if enough growth is attainable, and it will also try to avoid pacifist drones by switching out of SE models with too many police penalties. All the SE model effects are moddable because the AI is not hardcoded in any particular choices. This feature is also capable of managing all the custom factions.
@@ -104,6 +112,8 @@ When enabled, use `Shift+A` shortcut to automate any specific unit and it will f
 Beware formers automated in this way **can replace any existing improvements** on the territory if Thinker calculates the replacement would increase tile production. However automated formers will never raise/lower terrain unless this is selected from automation preferences. To prevent the formers from ever replacing some specific improvements, such as bunkers, they need to be placed outside the workable base radius from any friendly base.
 
 Bases managed by Thinker governors will mostly follow the same options as provided in the base governor settings. Adjusting explore/discover/build/conquer governor priorities from the base window has the same effect compared to AIs using these choices as faction priorities. Enabling terraformer production in the governor settings will also allow governors to build crawlers since they don't have a separate option in the menu.
+
+The governor settings also include a facilities-only priority. While it is selected, the governor only considers ordinary base facilities for production and ignores units, secret projects and orbital satellites. If no facility can be built, the base stockpiles energy and the governor checks again every turn, so facilities unlocked by later technologies are started without manual intervention.
 
 By default Thinker governors will not attempt to start secret projects or hurry production with energy reserves, but this can be enabled from the governor settings. If production is hurried by the base governor, this will be displayed as a separate line in the message log. Normally the governor tries to keep some energy credits in reserve before attempting to hurry production.
 

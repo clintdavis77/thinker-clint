@@ -85,39 +85,6 @@ bool has_orbital_drops(int faction_id) {
         || has_project(FAC_SPACE_ELEVATOR, faction_id);
 }
 
-bool has_ability(int faction_id, VehAbl abl, VehChassis chs, VehWeapon wpn) {
-    int F = Ability[abl].flags;
-    int triad = Chassis[chs].triad;
-    bool is_combat = Weapon[wpn].offense_value != 0;
-    bool is_former = Weapon[wpn].mode == WMODE_TERRAFORM;
-    bool is_probe = Weapon[wpn].mode == WMODE_PROBE;
-
-    if ((triad == TRIAD_LAND && !(F & AFLAG_ALLOWED_LAND_UNIT))
-    || (triad == TRIAD_SEA && !(F & AFLAG_ALLOWED_SEA_UNIT))
-    || (triad == TRIAD_AIR && !(F & AFLAG_ALLOWED_AIR_UNIT))) {
-        return false;
-    }
-    if ((!(F & AFLAG_ALLOWED_COMBAT_UNIT) && is_combat)
-    || (!(F & AFLAG_ALLOWED_TERRAFORM_UNIT) && is_former)
-    || (!(F & AFLAG_ALLOWED_NONCOMBAT_UNIT) && !is_combat && !is_former)) {
-        return false;
-    }
-    if ((F & AFLAG_NOT_ALLOWED_PROBE_TEAM && is_probe)
-    || (F & AFLAG_ONLY_PROBE_TEAM && !is_probe)) {
-        return false;
-    }
-    if (F & AFLAG_TRANSPORT_ONLY_UNIT && Weapon[wpn].mode != WMODE_TRANSPORT) {
-        return false;
-    }
-    if (F & AFLAG_NOT_ALLOWED_FAST_UNIT && Chassis[chs].speed > 1) {
-        return false;
-    }
-    if (F & AFLAG_NOT_ALLOWED_PSI_UNIT && Weapon[wpn].offense_value < 0) {
-        return false;
-    }
-    return has_tech(Ability[abl].preq_tech, faction_id);
-}
-
 bool is_native_unit(int unit_id) {
     assert(unit_id >= 0 && unit_id < MaxProtoNum);
     return unit_id >= 0 && unit_id < MaxProtoFactionNum && Units[unit_id].offense_value() < 0;
@@ -3939,6 +3906,4 @@ int set_board_to(int veh_id, int trans_veh_id) {
     debug("set_board_to %2d %2d %s -> %s\n", veh->x, veh->y, veh->name(), v2->name());
     return VEH_SYNC;
 }
-
-
 

@@ -7,6 +7,8 @@ int __cdecl has_abil(int unit_id, VehAblFlag ability);
 int __cdecl arty_range(int unit_id);
 int __cdecl drop_range(int faction_id);
 bool has_orbital_drops(int faction_id);
+int ability_slot_limit(int faction_id);
+bool ability_conflict(uint32_t abls, VehAbl abl);
 bool has_ability(int faction_id, VehAbl abl, VehChassis chs, VehWeapon wpn);
 bool is_native_unit(int unit_id);
 bool is_battle_ogre(int unit_id);
@@ -107,4 +109,3 @@ int set_action(int veh_id, int act, char icon);
 int set_order_none(int veh_id);
 int set_convoy(int veh_id, ResType res);
 int set_board_to(int veh_id, int trans_veh_id);
-

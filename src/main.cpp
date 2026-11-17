@@ -64,6 +64,8 @@ int option_handler(void* user, const char* section, const char* name, const char
         cf->new_unit_names = atoi(value);
     } else if (MATCH("design_units")) {
         cf->design_units = atoi(value);
+    } else if (MATCH("third_ability_tech")) {
+        cf->third_ability_tech = clamp(atoi(value), -1, MaxTechnologyNum - 1);
     } else if (MATCH("factions_enabled")) {
         cf->factions_enabled = atoi(value);
     } else if (MATCH("social_ai")) {
@@ -534,6 +536,5 @@ DLL_EXPORT BOOL APIENTRY DllMain(HINSTANCE UNUSED(hinstDLL), DWORD fdwReason, LP
     }
     return TRUE;
 }
-
 
 

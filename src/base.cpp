@@ -1111,11 +1111,13 @@ int __cdecl mod_base_build(int base_id, int has_gov) {
     int choice = 0;
     set_base(base_id);
     base_compute(1);
+    bool fac_only = gov_facilities_only(&base);
 
     if (!base.plr_owner() && *ControlUpkeepA) {
         consider_staple(base_id);
     }
-    if (base.state_flags & BSTATE_PRODUCTION_DONE || has_gov) {
+    if (base.state_flags & BSTATE_PRODUCTION_DONE || has_gov
+    || (fac_only && !is_facility_item(base.item()))) {
         debug("BUILD NEW\n");
         choice = select_build(base_id);
     } else if (base.item() >= 0 && !can_build_unit(base_id, base.item())) {
@@ -1124,7 +1126,8 @@ int __cdecl mod_base_build(int base_id, int has_gov) {
     } else if (base.item() < 0 && !can_build(base_id, abs(base.item()))) {
         debug("BUILD CHANGE\n");
         choice = select_build(base_id);
-    } else if ((base.item() < 0 || !Units[base.item()].is_garrison_unit())
+    } else if (!fac_only
+    && (base.item() < 0 || !Units[base.item()].is_garrison_unit())
     && (base.gov_config() & GOV_ALLOW_COMBAT)
     && (base.gov_config() & GOV_MAY_PROD_LAND_DEFENSE)
     && garrison_count(base.x, base.y) <= 0
@@ -1190,7 +1193,7 @@ void __cdecl base_compute(int update_prev) {
         BASE* base = *CurrentBase;
         assert(base->queue_size < 10);
         assert(!(base->governor_flags &
-            (GOV_UNK_4|GOV_UNK_8|GOV_UNK_10|GOV_UNK_4000|GOV_UNK_10000000|GOV_UNK_20000000)));
+            (GOV_UNK_4|GOV_UNK_8|GOV_UNK_10|GOV_UNK_4000|GOV_UNK_20000000)));
         for (int i = base->queue_size; i > 0; --i) {
             if (i > 9 || base->queue_items[i] < -SP_ID_Last
             || base->queue_items[i] >= MaxProtoNum) {
@@ -4000,6 +4003,14 @@ int __cdecl mod_base_upkeep(int base_id) {
     // to allow rushing the following production item during turn upkeep
     base->state_flags &= ~(BSTATE_PSI_GATE_USED|BSTATE_FACILITY_SCRAPPED|BSTATE_HURRY_PRODUCTION);
     base_compute(1); // Always update
+    // Facilities-only governors recheck production every turn while not building
+    // a facility. This selects newly available facilities when stockpiling energy
+    // and replaces any non-facility item. A manual build queue is still respected.
+    if (conf.manage_player_bases && base->queue_size == 0
+    && gov_facilities_only(base) && !is_facility_item(base->queue_items[0])) {
+        mod_base_reset(base_id, 1);
+        set_base(base_id);
+    }
     // Fix 43. [BUG] Abandoning a base after building a colony pod no longer skips
     // the base production of the next base.
     if (mod_base_production()) {

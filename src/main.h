@@ -24,7 +24,7 @@
 #pragma once
 
 #ifdef BUILD_REL
-    #define MOD_VERSION "Thinker Mod v5.5"
+    #define MOD_VERSION "Thinker Mod v5.6"
 #else
     #define MOD_VERSION "Thinker Mod develop build"
 #endif
@@ -158,6 +158,7 @@ struct Config {
     int new_base_names = 1;
     int new_unit_names = 1;
     int design_units = 1;
+    int third_ability_tech = TECH_MindMac;
     int factions_enabled = 7;
     int social_ai = 1;
     int social_ai_bias = 10;
@@ -396,6 +397,5 @@ void exit_fail(int32_t addr);
 void exit_fail();
 int opt_handle_error(const char* section, const char* name);
 int opt_list_parse(int32_t* dst, char* src, int num, int min_val, int max_val);
-
 
 

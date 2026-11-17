@@ -117,7 +117,8 @@ void design_units(int faction_id) {
         (has_chassis(fc, CHS_FOIL) ? CHS_FOIL : CHS_INFANTRY);
     VehAbl DefendAbls[] =
         {ABL_ID_AAA, ABL_ID_COMM_JAMMER, ABL_ID_POLICE_2X, ABL_ID_TRANCE, ABL_ID_TRAINED};
-    bool twoabl = has_tech(Rules->tech_preq_allow_2_spec_abil, fc);
+    const int ability_slots = ability_slot_limit(fc);
+    const bool twoabl = ability_slots >= 2;
     bool upgrade = !(*CurrentTurn % 4);
     int wpn_v = Weapon[wpn].offense_value;
     int arm_v = Weapon[arm].offense_value;
@@ -249,6 +250,11 @@ void design_units(int faction_id) {
                 && (rec >= REC_QUANTUM || Weapon[wpn].cost <= 6 * rec
                 || !arty.cost_increase_with_speed())
                 && arm_ship != ARM_NO_ARMOR ? ABL_AAA : ABL_NONE);
+            // Long-range artillery ships benefit from seeing targets beyond normal sight.
+            if (ability_slots >= 3 && bit_count((uint32_t)abls) == 2
+            && has_ability(fc, ABL_ID_DEEP_RADAR, chs_ship, wpn)) {
+                abls |= ABL_DEEP_RADAR;
+            }
             create_proto(fc, chs_ship, wpn, arm_ship, abls, rec, PLAN_OFFENSE);
         }
         if (!long_range || arty.cost < -1 || arty.cost > 2) {
@@ -274,7 +280,7 @@ void design_units(int faction_id) {
                 abls |= (VehAblFlag)(1 << v);
                 num++;
             }
-            if (num > twoabl) {
+            if (num >= ability_slots) {
                 break;
             }
         }
@@ -286,12 +292,18 @@ void design_units(int faction_id) {
         }
     }
     if (has_chassis(fc, CHS_NEEDLEJET)) {
-        // TODO: propose_proto might have issues creating multiple similar variations
-        // ABL_DEEP_RADAR can be used to distinguish different prototypes
+        // Radar also helps distinguish variants when the third-slot extension is disabled.
         VehAblFlag addon = twoabl && has_ability(fc, ABL_ID_DEEP_RADAR, CHS_NEEDLEJET, wpn)
             ? ABL_DEEP_RADAR : ABL_NONE;
         if (has_ability(fc, ABL_ID_AIR_SUPERIORITY, CHS_NEEDLEJET, wpn)) {
             VehAblFlag abls = ABL_AIR_SUPERIORITY | addon;
+            // Longer patrol range is useful for interceptors, but not worth replacing radar.
+            if (ability_slots >= 3 && addon
+            && (plans[fc].prioritize_naval
+                || plans[fc].enemy_base_range > Chassis[CHS_NEEDLEJET].speed)
+            && has_ability(fc, ABL_ID_FUEL_NANOCELLS, CHS_NEEDLEJET, wpn)) {
+                abls |= ABL_FUEL_NANOCELLS;
+            }
             create_proto(fc, CHS_NEEDLEJET, wpn, ARM_NO_ARMOR, abls, rec, PLAN_AIR_SUPERIORITY);
         }
         if (has_ability(fc, ABL_ID_NERVE_GAS, CHS_NEEDLEJET, wpn) && use_nerve_gas(fc)) {
@@ -311,6 +323,11 @@ void design_units(int faction_id) {
             ? ABL_SUPER_TERRAFORMER : ABL_NONE)
             | (twoabl && !grav && has_ability(fc, ABL_ID_FUNGICIDAL, chs, WPN_TERRAFORMING_UNIT)
             ? ABL_FUNGICIDAL : ABL_NONE);
+        // Preserve the two terraforming bonuses; reduce support only when it is not free.
+        if (ability_slots >= 3 && bit_count((uint32_t)abls) == 2 && Factions[fc].SE_support < 3
+        && has_ability(fc, ABL_ID_CLEAN_REACTOR, chs, WPN_TERRAFORMING_UNIT)) {
+            abls |= ABL_CLEAN_REACTOR;
+        }
         create_proto(fc, chs, WPN_TERRAFORMING_UNIT, ARM_NO_ARMOR, abls,
             REC_FUSION, PLAN_TERRAFORM);
     }
@@ -588,5 +605,3 @@ void plans_upkeep(int faction_id) {
             p->enemy_bases, p->enemy_mil_factor, p->enemy_base_range);
     }
 }
-
-

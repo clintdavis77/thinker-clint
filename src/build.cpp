@@ -53,6 +53,7 @@ int __cdecl mod_base_hurry() {
     bool is_cheap = conf.simple_hurry_cost || b->minerals_accumulated >= Rules->retool_exemption;
     bool is_project = t <= -SP_ID_First && t >= -SP_ID_Last;
     bool player_gov = is_human(b->faction_id);
+    bool fac_only = gov_facilities_only(b);
     int hurry_option;
 
     if (conf.base_hurry < 1) {
@@ -71,6 +72,9 @@ int __cdecl mod_base_hurry() {
         hurry_option = conf.base_hurry;
     }
     if (hurry_option < (is_project ? 2 : 1) || !b->can_hurry_item()) {
+        return 0;
+    }
+    if (fac_only && !is_facility_item(t)) {
         return 0;
     }
     int mins = mineral_cost(base_id, t) - b->minerals_accumulated;
@@ -141,7 +145,7 @@ int __cdecl mod_base_hurry() {
         return 0;
     }
     if (!is_project && t < 0 && turns > 1 && cost < credits/16
-    && (!player_gov || b->governor_flags & GOV_MAY_PROD_FACILITIES)
+    && (!player_gov || fac_only || b->governor_flags & GOV_MAY_PROD_FACILITIES)
     && credits >= clamp(80*f->base_count, 2000, 5000) && credits / 256 > random(64)) {
         return hurry_item(base_id, mins, cost);
     }
@@ -588,6 +592,18 @@ int unit_score(BASE* const base, int unit_id, int psi_score, int psi_atk, int ps
     && (f->SE_support_pending < 3 || base->mineral_consumption > 0)) {
         v += 16;
     }
+    if (bit_count(u->ability_flags) >= 3) {
+        if (u->ability_flags & ABL_DEEP_RADAR
+        && u->triad() == TRIAD_SEA && u->ability_flags & ABL_ARTILLERY
+        && conf.long_range_artillery > 0 && !*MultiplayerActive) {
+            v += 8;
+        }
+        if (u->ability_flags & ABL_FUEL_NANOCELLS
+        && u->plan == PLAN_AIR_SUPERIORITY
+        && (p->prioritize_naval || p->enemy_base_range > u->speed())) {
+            v += 24; // Extra patrol range is worth paying for on distant fronts.
+        }
+    }
     if (unit_id == base->production_id_last
     && Rules->retool_strictness >= RETOOL_FREE_PROJECT && check_retool(base)) {
         v += 200;
@@ -858,6 +874,7 @@ int select_build(int base_id) {
         }
     }
     int gov = base->gov_config();
+    bool fac_only = gov_facilities_only(base);
     int minerals = base->mineral_surplus + base->minerals_accumulated/10;
     int reserve = max(2, base->mineral_intake_2 / 2);
     int base_reg = region_at(base->x, base->y);
@@ -867,11 +884,12 @@ int select_build(int base_id) {
         && !can_build(base_id, -base->item())
         && !(base->state_flags & BSTATE_PRODUCTION_DONE)
         && base->minerals_accumulated > Rules->retool_exemption;
-    bool allow_units = can_build_unit(base_id, -1) && !project_change;
-    bool allow_supply = !sea_base && gov & GOV_MAY_PROD_TERRAFORMERS;
+    bool allow_units = !fac_only && can_build_unit(base_id, -1) && !project_change;
+    bool allow_supply = !fac_only && !sea_base && gov & GOV_MAY_PROD_TERRAFORMERS;
     bool allow_ships = has_ships(faction_id)
         && adjacent_region(base->x, base->y, -1, *MapAreaSqRoot, TRIAD_SEA);
-    bool allow_pods = allow_expand(faction_id) && (base->pop_size > 1 || base->nutrient_surplus > 0);
+    bool allow_pods = !fac_only && allow_expand(faction_id)
+        && (base->pop_size > 1 || base->nutrient_surplus > 0);
     bool drone_riots = base->drone_riots() || base->drone_riots_active();
     int drones = base->drone_total + base->specialist_adjust;
     int base_limit = 0;
@@ -1024,7 +1042,11 @@ int select_build(int base_id) {
 
     for (const auto& item : build_order) {
         const int t = item.item_id;
-        if (t >= 0 && !(gov & GOV_MAY_PROD_FACILITIES && can_build(base_id, t))) {
+        if (t >= 0 && !((fac_only || (gov & GOV_MAY_PROD_FACILITIES))
+        && can_build(base_id, t))) {
+            continue;
+        }
+        if (fac_only && t < 0) {
             continue;
         }
         if (t <= DefendUnit && !allow_units) {
@@ -1304,12 +1326,11 @@ int select_build(int base_id) {
     if (builds.size()) {
         return builds.top().item_id;
     }
-    if (!allow_units || !(gov & GOV_ALLOW_COMBAT)) {
+    if (fac_only || !allow_units || !(gov & GOV_ALLOW_COMBAT)) {
         return -FAC_STOCKPILE_ENERGY;
     }
     debug("BUILD COMBAT\n");
     return select_combat(base_id, sea_base, allow_ships);
 }
-
 
 

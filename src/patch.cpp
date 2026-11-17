@@ -2,6 +2,7 @@
 #include "patch.h"
 #include "patchdata.h"
 #include "patchveh.h"
+#include "workshop.h"
 
 
 int __cdecl BaseWin_random_seed() {
@@ -1073,6 +1074,9 @@ bool patch_setup(Config* cf) {
     write_call(0x5BB364, (int)mod_propose_proto); // tech_achieved
     write_call(0x5BB5CD, (int)mod_propose_proto); // tech_achieved
     write_call(0x438354, (int)mod_make_proto); // DesignWin::design_it
+    if (cf->third_ability_tech >= 0) {
+        patch_workshop();
+    }
     write_call(0x580F6C, (int)mod_make_proto); // propose_proto
     write_call(0x587364, (int)mod_make_proto); // read_units
     write_call(0x5B2FED, (int)mod_make_proto); // setup_player
@@ -1769,4 +1773,3 @@ bool patch_setup(Config* cf) {
     }
     return true;
 }
-

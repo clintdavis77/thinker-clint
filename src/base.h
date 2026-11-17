@@ -5,6 +5,26 @@
 const uint32_t GOV_ALLOW_COMBAT =
     (GOV_MAY_PROD_LAND_COMBAT | GOV_MAY_PROD_NAVAL_COMBAT | GOV_MAY_PROD_AIR_COMBAT);
 
+/*
+Facilities-only governor priority. It only applies to player bases managed by
+Thinker, so AI bases (which report all governor flags as allowed) are unaffected.
+*/
+inline bool gov_facilities_only(const BASE* base) {
+    return is_human(base->faction_id)
+        && (base->governor_flags & GOV_ACTIVE)
+        && (base->governor_flags & GOV_MANAGE_PRODUCTION)
+        && (base->governor_flags & GOV_PRIORITY_FACILITIES);
+}
+
+/*
+Ordinary base facilities are stored as negative item ids in -1 .. -Fac_ID_Last.
+Secret projects, satellites and stockpile energy are outside this range.
+*/
+inline bool is_facility_item(int item_id) {
+    return item_id < 0 && item_id >= -Fac_ID_Last;
+}
+
+
 int __cdecl mod_base_init(int faction_id, int x, int y);
 void __cdecl mod_base_kill(int base_id);
 void __cdecl mod_capture_base(int base_id, int faction_id, int is_probe);

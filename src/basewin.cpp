@@ -459,6 +459,11 @@ int __thiscall BaseWin_gov_options(BaseWindow* This, int flag) {
                 base->governor_flags |= p[1];
             }
         }
+        if (base->governor_flags & GOV_PRIORITY_FACILITIES) {
+            // Keep the facilities-only priority exclusive with the original priorities.
+            base->governor_flags &= ~(GOV_PRIORITY_CONQUER|GOV_PRIORITY_BUILD
+                |GOV_PRIORITY_DISCOVER|GOV_PRIORITY_EXPLORE);
+        }
         Factions[base->faction_id].base_governor_adv = base->governor_flags;
         if (!flag) {
             if (base->governor_flags & GOV_ACTIVE) {

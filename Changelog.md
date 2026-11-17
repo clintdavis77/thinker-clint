@@ -1,6 +1,12 @@
 
 # Thinker mod release changelog
 
+## Version 5.6 (2026-11-17)
+* Add a third unit special-ability slot unlocked by Mind/Machine Interface after Neural Grafting, configurable with `third_ability_tech`.
+* Add a numbered third-ability selector and preview in the Design Workshop without changing unit or savegame layouts.
+* Allow Thinker AI to design three-ability garrisons, artillery ships, interceptors, and support-saving formers when the necessary technologies are known.
+* Add a facilities-only governor priority that restricts base production to ordinary facilities and stockpiles energy, rechecking each turn, when none are available.
+
 ## Version 5.5 (2026-08-16)
 * Modify main menu screen to also display Change Options button for Thinker features.
 * Add option MovieExtension in Alpha Centauri.ini to choose custom file formats for external video players.

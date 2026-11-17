@@ -778,6 +778,7 @@ void __cdecl tech_achieved(int faction_id, int tech_id, int faction_id_2, int is
         plr->tech_research_id = -1;
     }
     plr->tech_trade_source[tech_id] = faction_id_2 <= 0 ? 0 : faction_id_2;
+    const int previous_ability_limit = ability_slot_limit(faction_id);
     int is_first = TechOwners[tech_id] == 0;
     TechOwners[tech_id] |= (1 << faction_id);
     ++plr->tech_achieved;
@@ -913,6 +914,11 @@ void __cdecl tech_achieved(int faction_id, int tech_id, int faction_id_2, int is
         } else if (!*MultiplayerActive) {
             BasePop_exec_3(&cur_popup, 0, 0);
         }
+    }
+    if (faction_id == MapWin->cOwner && !*MultiplayerActive
+    && previous_ability_limit < 3 && ability_slot_limit(faction_id) == 3) {
+        parse_says(0, Tech[tech_id].name, -1, -1);
+        X_pop_2("modmenu", "THIRDABILITY", 0);
     }
     int has_freefac = 0;
     for (int i = 0; i < fac->faction_bonus_count; ++i) {
@@ -1263,5 +1269,4 @@ int __cdecl tech_alt_val(int tech_id, int faction_id, int flag) {
     faction_id, level, owners, weights, value, tech_id, tech_str(tech_id));
     return value;
 }
-
 

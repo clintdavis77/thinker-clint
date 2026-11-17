@@ -61,7 +61,7 @@ Always minimise game window when not activated.
 #GOVOPTIONS
 #xs 440
 #caption Governor Settings for $BASENAME0
-#checkbox 21
+#checkbox 22
 #itemlist
 Governor is active.
 Governor may use multiple priorities (e.g. Explore AND Discover), or no priorities.
@@ -84,6 +84,7 @@ __Governor may produce base facilities.
 __Governor may produce psych facilities with side effects.
 __Governor may produce secret projects.
 __Governor may HURRY production.
+Governor only produces base facilities (stockpiles energy when none are available).
 
 #ASKNUMBER
 #xs 400
@@ -103,6 +104,13 @@ Value:
 #xs 400
 #caption $MSG0
 $MSG1
+
+#THIRDABILITY
+#xs 440
+#caption Design Workshop
+^^With the discovery of {$MSG0}, your units may now carry up to THREE special abilities.
+^^Open the Design Workshop and select row 3 in the special-ability panel.
+^^Each ability still requires its own technology. Mineral costs are calculated normally.
 
 #TOPMENU
 #xs 420
