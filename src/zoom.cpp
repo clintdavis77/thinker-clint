@@ -21,6 +21,13 @@
 
 #include "main.h"
 
+/* Diagnostics are written to debug.txt only in debug builds. */
+#ifdef DEBUG
+    #define zoom_diag debug
+#else
+    #define zoom_diag(...) do {} while (0)
+#endif
+
 namespace {
 
 /* PRACX runtime state (image base of prax.dll is 0x10000000). */
@@ -51,10 +58,16 @@ bool prax_signature_ok() {
     /* cmp ecx, [img_base + 0x8d94] : 3B 0D 94 8D 04 10 */
     const uint8_t* cmp = reinterpret_cast<const uint8_t*>(
         reinterpret_cast<uintptr_t>(prax_module) + PRAX_LOOP_CMP);
-    uint32_t expected =
-        reinterpret_cast<uintptr_t>(prax_module) + (PRAX_ZOOM_LEVELS - 0x10000000);
-    return cmp[0] == 0x3B && cmp[1] == 0x0D
-        && *reinterpret_cast<const uint32_t*>(cmp + 2) == expected;
+    /* PRAX_ZOOM_LEVELS is already an RVA; the loader relocated the
+       instruction's immediate to module_base + RVA. */
+    uint32_t expected = reinterpret_cast<uintptr_t>(prax_module) + PRAX_ZOOM_LEVELS;
+    uint32_t actual = *reinterpret_cast<const uint32_t*>(cmp + 2);
+    bool ok = cmp[0] == 0x3B && cmp[1] == 0x0D && actual == expected;
+    if (!ok) {
+        zoom_diag("signature FAIL: op=%02X %02X imm=%08X expected=%08X\n",
+            cmp[0], cmp[1], actual, expected);
+    }
+    return ok;
 }
 
 /* Locate prax.dll and redirect PRACXZoomKeyPress's nearest-level loop to use
@@ -71,17 +84,18 @@ void patch_prax_zoom_loop() {
 
     uint8_t* imm = reinterpret_cast<uint8_t*>(
         reinterpret_cast<uintptr_t>(prax_module) + PRAX_LOOP_CMP + 2);
-    uint32_t replacement =
-        reinterpret_cast<uintptr_t>(prax_module) + (PRAX_FACTOR_COUNT - 0x10000000);
+    uint32_t replacement = reinterpret_cast<uintptr_t>(prax_module) + PRAX_FACTOR_COUNT;
 
     DWORD old_protect;
     if (!VirtualProtect(imm, 4, PAGE_EXECUTE_READWRITE, &old_protect)) {
+        zoom_diag("VirtualProtect FAILED (err %lu)\n", GetLastError());
         return;
     }
     *reinterpret_cast<uint32_t*>(imm) = replacement;
     DWORD ignored;
     VirtualProtect(imm, 4, old_protect, &ignored);
     prax_patched = true;
+    zoom_diag("loop patched OK (now compares m_iZoomFactorCount)\n");
     debug("Thinker: PRACX zoom level loop patched\n");
 }
 
@@ -98,6 +112,12 @@ void extend_pracx_zoom_table() {
     int count = *prax_ptr<int>(PRAX_FACTOR_COUNT);
     if (!factors || count != 6) {
         /* Either not initialized yet, or already extended (count == 7). */
+        static bool once = false;
+        if (!once) {
+            once = true;
+            zoom_diag("table state: factors=%p count=%d levels=%d\n",
+                (void*)factors, count, *prax_ptr<int>(PRAX_ZOOM_LEVELS));
+        }
         return;
     }
     if (factors == extended_factors) {
@@ -135,6 +155,8 @@ void extend_pracx_zoom_table() {
     *prax_ptr<int>(PRAX_ZERO_INDEX) = zero_index;
     extended_factors = extra;
 
+    zoom_diag("EXTENDED to 7: %d %d %d %d %d %d %d\n",
+        extra[0], extra[1], extra[2], extra[3], extra[4], extra[5], extra[6]);
     debug("Thinker: PRACX zoom factors: %d %d %d %d %d %d %d\n",
         extra[0], extra[1], extra[2], extra[3], extra[4], extra[5], extra[6]);
 }
@@ -142,11 +164,22 @@ void extend_pracx_zoom_table() {
 } // namespace
 
 void extend_pracx_zoom() {
+    static bool first_call = true;
+    if (first_call) {
+        first_call = false;
+        zoom_diag("Thinker zoom extension tick\n");
+    }
     if (!prax_module) {
         prax_module = GetModuleHandleA("prax.dll");
         if (!prax_module) {
+            static bool once = false;
+            if (!once) {
+                once = true;
+                zoom_diag("prax.dll NOT FOUND (GetModuleHandleA returned NULL)\n");
+            }
             return;
         }
+        zoom_diag("prax.dll found at %p\n", (void*)prax_module);
     }
     patch_prax_zoom_loop();
     if (!prax_patched) {
@@ -160,6 +193,7 @@ void extend_pracx_zoom() {
         FZoomInit zoom_init = reinterpret_cast<FZoomInit>(
             reinterpret_cast<uintptr_t>(prax_module) + PRAX_ZOOM_INIT);
         zoom_init();
+        zoom_diag("called PRACX ZoomInit (levels=%d)\n", configured_levels);
     }
     extend_pracx_zoom_table();
 }

@@ -1,6 +1,9 @@
 
 # Thinker mod release changelog
 
+## Version 5.7.1 (2026-11-17)
+* Fix the new PRACX zoom level in 5.7, which was disabled by a bad signature check on relocated PRACX addresses.
+
 ## Version 5.7 (2026-11-17)
 * Add a seventh map zoom level when running with PRACX, inserted between the existing levels 2 and 3 while leaving the other levels unchanged.
 
