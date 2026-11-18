@@ -61,6 +61,18 @@ This uses only Python's standard library and does not modify the executable.
 
 Use a separate game installation and a debug build.
 
+For event-window scaling with PRACX and Longevity Vaccine enabled, test at a
+resolution above 1024×768. Convene the Planetary Council and check that the vote
+buttons, portraits, and hitboxes scale together. Complete your first Secret
+Project with Planetary Monuments enabled and check that the achievement plaque
+fills a centered 4:3 area; also open the monument from the menu. Repeat without
+Longevity Vaccine to confirm both screens still use their original layouts.
+At 3840×2160 with Longevity Vaccine 1.0.0, triggering these windows in a copied
+save confirmed the Council scaling wrapper ran and the achievement window
+expanded from 1024 pixels to the full screen width, with the 4:3 art scaled
+separately. These checks exercised the windows directly, not a full turn.
+Both windows also opened with the unmodified GOG executable at 1024×768.
+
 For the former planting orders, select a former and use `Ctrl+Shift+P` (also
 available in the `Alt+T` menu). Test each of the four choices with player unit
 management both on and off. Confirm home orders remain within that base's

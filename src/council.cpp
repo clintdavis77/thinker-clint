@@ -1,5 +1,6 @@
 
 #include "council.h"
+#include "patch.h"
 
 void __cdecl clear_council_notify(int faction_id) {
     CouncilProposal[faction_id] = 0;
@@ -37,7 +38,9 @@ void __cdecl council(int faction_id, int proposal_id, int candidate_id) {
         popp(ScriptFile, "CALLSCOUNCIL", 0, "council_sm.pcx", 0);
     }
     *GameState |= STATE_COUNCIL_HAS_CONVENED;
-    CouncWin_init(CouncWin, proposal_id, candidate_id);
+    // Longevity Vaccine brackets this call to scale the layout, drawing and hitboxes.
+    auto init = (FCouncWin_init)engine_call_target(0x4284CA, (uintptr_t)CouncWin_init);
+    init(CouncWin, proposal_id, candidate_id);
     if (proposal_id == PROP_ELECT_PLANETARY_GOVERNOR
     && *GovernorFaction == MapWin->cOwner
     && old_governor != MapWin->cOwner

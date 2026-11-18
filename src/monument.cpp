@@ -1,5 +1,6 @@
 
 #include "monument.h"
+#include "patch.h"
 
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wstringop-truncation"
@@ -21,7 +22,9 @@ void __cdecl monument(int is_new_event) {
         }
         *dword_7FD634 = achieved_count;
         if (achieved_count) {
-            if (!MonuWin_init(MonuWin)) {
+            // Keep the original call site's scaling wrapper for the achievement screen.
+            auto init = (FMonuWin)engine_call_target(0x476AE6, (uintptr_t)MonuWin_init);
+            if (!init(MonuWin)) {
                 MonuWin->is_detail_open = is_new_event != 0;
                 CallFunc<57, FWin_set_modal>(MonuWin, 0, nullptr, nullptr);
                 GraphicWin_close(MonuWin);

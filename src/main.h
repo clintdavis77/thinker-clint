@@ -24,7 +24,7 @@
 #pragma once
 
 #ifdef BUILD_REL
-    #define MOD_VERSION "Thinker Mod v5.8"
+    #define MOD_VERSION "Thinker Mod v5.8.1"
 #else
     #define MOD_VERSION "Thinker Mod develop build"
 #endif
@@ -397,5 +397,4 @@ void exit_fail(int32_t addr);
 void exit_fail();
 int opt_handle_error(const char* section, const char* name);
 int opt_list_parse(int32_t* dst, char* src, int num, int min_val, int max_val);
-
 

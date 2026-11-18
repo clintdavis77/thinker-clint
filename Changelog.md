@@ -1,6 +1,9 @@
 
 # Thinker mod release changelog
 
+## Version 5.8.1 (2026-11-18)
+* Fix undersized Planetary Council vote windows and Planetary Monument achievement screens when using Longevity Vaccine.
+
 ## Version 5.8 (2026-11-17)
 * Add former orders to plant forest or fungus near their home base or throughout reachable owned and unclaimed territory, without replacing other improvements.
 

@@ -21,5 +21,6 @@ void write_bytes(int32_t addr, const byte* old_bytes, const byte* new_bytes, int
 void write_byte(int32_t addr, byte old_byte, byte new_byte);
 void write_word(int32_t addr, int32_t old_word, int32_t new_word);
 void remove_call(int32_t addr);
+uintptr_t engine_call_target(uintptr_t site, uintptr_t fallback);
 bool patch_setup(Config* cf);
 

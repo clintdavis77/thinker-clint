@@ -123,6 +123,33 @@ ATOM WINAPI ModRegisterClassA(WNDCLASS* pstWndClass) {
 }
 
 /*
+ Follow an original engine call site when a graphics patch wraps its callee.
+ Only accept a direct call into executable memory in the game image, including
+ code sections added by the graphics patch.
+*/
+uintptr_t engine_call_target(uintptr_t site, uintptr_t fallback) {
+    const byte* call = (const byte*)site;
+    if (call[0] != 0xE8) {
+        return fallback;
+    }
+    int32_t rel;
+    memcpy(&rel, call + 1, sizeof(rel));
+    uintptr_t target = site + 5 + rel;
+    if (target == fallback) {
+        return fallback;
+    }
+    MEMORY_BASIC_INFORMATION info = {};
+    if (VirtualQuery((const void*)target, &info, sizeof(info))
+    && info.AllocationBase == GetModuleHandleA(NULL)
+    && info.Type == MEM_IMAGE && info.State == MEM_COMMIT
+    && (info.Protect == PAGE_EXECUTE || info.Protect == PAGE_EXECUTE_READ
+        || info.Protect == PAGE_EXECUTE_READWRITE || info.Protect == PAGE_EXECUTE_WRITECOPY)) {
+        return target;
+    }
+    return fallback;
+}
+
+/*
 Replaces old byte sequence with a new byte sequence at address.
 Checks that the address contains old values before replacing.
 If new_bytes is a null pointer, replace old_bytes with NOP code instead.
