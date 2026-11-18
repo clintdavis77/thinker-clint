@@ -40,6 +40,13 @@ void update_main_region(int faction_id);
 void move_upkeep(int faction_id, UpdateMode mode);
 bool can_build_base(int x, int y, int faction_id, int triad);
 int base_tile_score(int x, int y, int faction_id, MAP* sq);
+bool is_planting_order(int order);
+bool planting_order_is_home(int order);
+FormerItem planting_order_item(int order);
+const char* planting_order_name(int order);
+bool planting_in_home_radius(int dx, int dy);
+int planting_tile_action(int order, MAP* sq, bool can_plant, bool can_remove_fungus);
+int planting_former_move(int veh_id, MAP* sq);
 int select_item(int x, int y, int faction_id, FormerMode mode, MAP* sq);
 int former_tile_score(int x, int y, int faction_id, MAP* sq);
 bool allow_scout(int faction_id, MAP* sq);
@@ -61,4 +68,3 @@ int trans_move(const int id);
 int nuclear_move(const int id);
 int airdrop_move(const int id);
 int combat_move(const int id);
-

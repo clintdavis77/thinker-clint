@@ -26,6 +26,18 @@ Close Dialog
 Show Statistics
 Change Mod Options
 Open Project Homepage
+Former forest/fungus orders (Ctrl+Shift+P)
+
+#FORMERPLANT
+#xs 440
+#caption Former forest/fungus automation
+^Select an order for this former. Other improvements are preserved.
+
+Cancel
+Plant forest near home base
+Plant fungus near home base
+Plant forest globally
+Plant fungus globally
 
 #STATS
 #xs 400

@@ -1,6 +1,9 @@
 
 # Thinker mod release changelog
 
+## Version 5.8 (2026-11-17)
+* Add former orders to plant forest or fungus near their home base or throughout reachable owned and unclaimed territory, without replacing other improvements.
+
 ## Version 5.7.1 (2026-11-17)
 * Fix the new PRACX zoom level in 5.7, which was disabled by a bad signature check on relocated PRACX addresses.
 

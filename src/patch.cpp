@@ -53,7 +53,17 @@ void mod_say_orders(char* buf, int veh_id) {
             }
         }
     }
-    return say_orders(buf, veh_id);
+    if (veh->is_former() && (veh->state & VSTATE_ON_ALERT)
+    && is_planting_order(veh->order_auto_type)) {
+        // The native automation-label table has no entries for Thinker's orders.
+        // Keep the native current-work/movement text without indexing that table.
+        snprintf(buf, StrBufLen, "[%s] ", planting_order_name(veh->order_auto_type));
+        veh->state &= ~VSTATE_ON_ALERT;
+        say_orders(buf, veh_id);
+        veh->state |= VSTATE_ON_ALERT;
+        return;
+    }
+    say_orders(buf, veh_id);
 }
 
 /*

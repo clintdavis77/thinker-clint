@@ -43,6 +43,11 @@ void __thiscall Console_automate(Console*, int veh_id, VehOrderAutoType mode) {
             }
             veh.order_auto_type = mode;
             veh.order = ORDER_NONE;
+            if (is_planting_order(mode)) {
+                veh.movement_turns = 0;
+                veh.waypoint_x[0] = -1;
+                veh.waypoint_y[0] = -1;
+            }
             veh.state = (veh.state & ~(VSTATE_UNK_2000000|VSTATE_UNK_1000000)) | VSTATE_ON_ALERT;
             veh.waypoint_count = 0;
             synch_veh(veh_id);
@@ -55,6 +60,39 @@ void __thiscall Console_automate(Console*, int veh_id, VehOrderAutoType mode) {
             Console_cursor_on_2(MapWin, 11, -1);
         }
     }
+}
+
+void show_planting_menu() {
+    int veh_id = MapWin->VehID;
+    if (*GameHalted || !MapWin->InVehMode || veh_id < 0 || veh_id >= *VehCount
+    || Vehs[veh_id].faction_id != *CurrentPlayerFaction || !Vehs[veh_id].is_former()
+    || !mapsq(Vehs[veh_id].x, Vehs[veh_id].y)) {
+        parse_says(0, "Former automation", -1, -1);
+        parse_says(1, "Select one of your formers on the world map first.", -1, -1);
+        popp("modmenu", "GENERIC", 0, 0, 0);
+        return;
+    }
+    int choice = popp("modmenu", "FORMERPLANT", 0, 0, 0);
+    if (choice < 1 || choice > 4) {
+        return;
+    }
+    if (*GameHalted || !MapWin->InVehMode || MapWin->VehID != veh_id || veh_id >= *VehCount
+    || Vehs[veh_id].faction_id != *CurrentPlayerFaction || !Vehs[veh_id].is_former()
+    || !mapsq(Vehs[veh_id].x, Vehs[veh_id].y)) {
+        return;
+    }
+    VehOrderAutoType order = (VehOrderAutoType)(ORDERA_PLANT_FOREST_HOME + choice - 1);
+    VEH& veh = Vehs[veh_id];
+    if (planting_order_is_home(order)
+    && (veh.home_base_id < 0 || veh.home_base_id >= *BaseCount
+    || Bases[veh.home_base_id].faction_id != veh.faction_id)) {
+        parse_says(0, "Former automation", -1, -1);
+        parse_says(1, "This former needs a friendly home base for a home-base order.", -1, -1);
+        popp("modmenu", "GENERIC", 0, 0, 0);
+        return;
+    }
+    Console_automate(MapWin, veh_id, order);
+    StatusWin_redraw(StatusWin);
 }
 
 /*

@@ -642,6 +642,10 @@ LRESULT WINAPI ModWinProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         BaseWin->res_window_tab = value;
         GraphicWin_redraw(BaseWin);
 
+    } else if (msg == WM_KEYDOWN && wParam == 'P' && ctrl_key_down() && shift_key_down()
+    && !alt_key_down() && !(lParam & (1L << 30)) && !*GameHalted && current_window() == GW_World) {
+        show_planting_menu();
+
     } else if (msg == WM_KEYDOWN && wParam == 'H' && ctrl_key_down()
     && !*MultiplayerActive && current_window() == GW_Base && *CurrentBaseID >= 0
     && Bases[*CurrentBaseID].faction_id == MapWin->cOwner) {
@@ -1237,6 +1241,9 @@ int show_mod_menu()
     }
     else if (ret == 3) {
         popup_homepage();
+    }
+    else if (ret == 4 && current_window() == GW_World) {
+        show_planting_menu();
     }
     return 0; // Close dialog
 }

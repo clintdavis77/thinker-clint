@@ -302,6 +302,11 @@ enum VehOrderAutoType {
     ORDERA_BOMBING_RUN = 10, // air units only
     ORDERA_ON_ALERT = 11,
     ORDERA_AUTOMATE_AIR_DEFENSE = 12,
+    // Thinker former orders. These values are saved in VEH::order_auto_type.
+    ORDERA_PLANT_FOREST_HOME = 13,
+    ORDERA_PLANT_FUNGUS_HOME = 14,
+    ORDERA_PLANT_FOREST_GLOBAL = 15,
+    ORDERA_PLANT_FUNGUS_GLOBAL = 16,
 };
 
 enum ProbeAction {

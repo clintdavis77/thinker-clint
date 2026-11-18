@@ -106,6 +106,8 @@ int __cdecl mod_enemy_veh(int veh_id) {
     do_all_non_input();
     bool skip = veh->moves_spent && veh->order == ORDER_MOVE_TO
         && veh->plan() != PLAN_NAVAL_TRANSPORT && !(veh->state & VSTATE_EXPLORE)
+        && !(veh->plr_owner() && veh->is_former() && (veh->state & VSTATE_ON_ALERT)
+        && is_planting_order(veh->order_auto_type))
         && !zoc_any(veh->x, veh->y, veh->faction_id);
 
     if (!skip && mod_enemy_move(veh_id) != VEH_SYNC) {
@@ -142,6 +144,8 @@ int __cdecl mod_enemy_move(int veh_id) {
     VEH* veh = &Vehs[veh_id];
     MAP* sq;
     bool plr_unit = veh->plr_owner();
+    bool planting = plr_unit && veh->is_former() && (veh->state & VSTATE_ON_ALERT)
+        && is_planting_order(veh->order_auto_type);
     debug("enemy_move %d %2d %2d %s\n", veh_id, veh->x, veh->y, veh->name());
 
     if (!(sq = mapsq(veh->x, veh->y))) {
@@ -157,11 +161,20 @@ int __cdecl mod_enemy_move(int veh_id) {
                 set_base(base_id);
             }
         }
-        if (conf.manage_player_units && move_upkeep_faction != veh->faction_id) {
+        static int planting_upkeep_turn = -1;
+        static int planting_upkeep_faction = -1;
+        bool refresh_planting = planting && (planting_upkeep_turn != *CurrentTurn
+            || planting_upkeep_faction != veh->faction_id);
+        if ((conf.manage_player_units || planting)
+        && (move_upkeep_faction != veh->faction_id || refresh_planting)) {
             move_upkeep(veh->faction_id, UM_Player);
+            if (planting) {
+                planting_upkeep_turn = *CurrentTurn;
+                planting_upkeep_faction = veh->faction_id;
+            }
         }
     }
-    if (thinker_move_upkeep(veh->faction_id)) {
+    if (thinker_move_upkeep(veh->faction_id) || planting) {
         int triad = veh->triad();
         if (plr_unit && veh->is_patrol_order()) {
             if (veh->need_refuel() && (sq->is_airbase()

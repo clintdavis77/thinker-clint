@@ -2753,6 +2753,9 @@ int __cdecl veh_wake(int veh_id) {
         veh->flags &= ~VFLAG_FULL_MOVE_SKIPPED;
     }
     veh->order = ORDER_NONE;
+    if (veh->is_former() && is_planting_order(veh->order_auto_type)) {
+        veh->order_auto_type = ORDERA_TERRA_AUTO_FULL;
+    }
     veh->state &= ~(VSTATE_UNK_8000000|VSTATE_UNK_2000000|VSTATE_UNK_1000000|VSTATE_EXPLORE|VSTATE_ON_ALERT);
     return veh_id;
 }

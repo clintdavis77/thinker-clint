@@ -1,4 +1,4 @@
-# Third-ability checks
+# Validation checks
 
 ## Release tooling tests
 
@@ -26,6 +26,12 @@ These compile the production selection/validation code against mock technology
 and component tables. They check the 1/2/3-slot progression, custom/disabled
 unlock tech, faction isolation, add/replace/remove, duplicates, hidden slots,
 missiles, incompatible abilities, and preservation of the custom-name field.
+The former automation tests also cover all four order IDs, the 21-tile home
+radius, opposite-terrain replacement, technology and terrain restrictions,
+and preservation of incompatible improvements. Movement tests use a simulated
+map to exercise home/global targets, neutral and foreign ownership, unsafe
+routes, reserved tiles, interrupted work, loss of the home base, and the
+fallback search when the normal fixed-size tile search misses a target.
 
 Verify binary patch sites against a supported, unmodified game executable:
 
@@ -54,6 +60,27 @@ This uses only Python's standard library and does not modify the executable.
 ## In-game regression checklist
 
 Use a separate game installation and a debug build.
+
+For the former planting orders, select a former and use `Ctrl+Shift+P` (also
+available in the `Alt+T` menu). Test each of the four choices with player unit
+management both on and off. Confirm home orders remain within that base's
+21-tile working radius, including across a wrapping map edge; global orders
+reach known owned and neutral tiles outside all base radii but not foreign
+territory. Check land and sea formers, missing technologies, blocked/dangerous
+routes, no available work, several formers, and a lost home base. Verify fungus
+is removed before forest is planted and forest can become fungus without
+removing other improvements. Test cancellation and changes while moving and
+working, save/reload, and multiplayer synchronization with matching binaries.
+
+The four menu choices were smoke-tested in a separate game copy with
+`manage_player_units=0`: each stored the intended automation mode and started
+the corresponding forest/fungus work. In an in-memory fixture with a reduced
+terraforming rate, global fungus completed over a forest while preserving a
+road and magtube. Normal-duration completion across turns, save/reload, and
+multiplayer synchronization have not yet been verified in-game. One
+exploratory run using rapid synthetic keystrokes exited unexpectedly; the
+cause is unknown. A paced repeat on the same former opened and canceled the
+menu without reproducing the exit.
 
 1. Before Neural Grafting: only slot 1 is usable. After Neural Grafting:
    slots 1 and 2. After Mind/Machine Interface: all three. In a new game,

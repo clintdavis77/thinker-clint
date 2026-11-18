@@ -2048,6 +2048,10 @@ int former_tile_score(int x, int y, int faction_id, MAP* sq) {
 int former_move(const int id) {
     VEH* veh = &Vehs[id];
     MAP* sq = mapsq(veh->x, veh->y);
+    if (veh->plr_owner() && (veh->state & VSTATE_ON_ALERT)
+    && is_planting_order(veh->order_auto_type)) {
+        return planting_former_move(id, sq);
+    }
     int item = -1;
     int choice = -1;
     int faction_id = veh->faction_id;
