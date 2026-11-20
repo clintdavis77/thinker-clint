@@ -24,6 +24,113 @@ It's strongly recommended to read Details.md since many features are added not p
 Remember also to star and watch the repository to receive notifications about new updates.
 
 
+Changes in this fork
+--------------------
+This fork picks up upstream Thinker at version 5.5 and continues its version numbering. The releases
+below add the features listed here on top of the upstream mod. Full descriptions are in
+[Details.md](Details.md) and release notes in the [Changelog](Changelog.md); this section summarises
+everything the fork adds and names the release that introduced it.
+
+### Special-ability slots in the Design Workshop (v5.6)
+* Units can now be given a **third special ability**. Neural Grafting still unlocks the second slot; a
+  third is unlocked by the technology set in `third_ability_tech` (Mind/Machine Interface by default),
+  and both that technology and the rules-file two-ability prerequisite must be known.
+* In the Design Workshop the special-ability panel now shows numbered rows **2** and **3**. Click row 3
+  to pick or clear its ability with the normal picker, and right-click a row to see the technology it
+  needs; a row that is not unlocked yet is drawn as *Locked*. The design summary also lists the third
+  ability's abbreviation.
+* The ability picker itself is unchanged: technology prerequisites, faction free abilities, component
+  restrictions, the mutually exclusive Carrier and Deep Pressure Hull choices, missile restrictions and
+  normal mineral costs all still apply to the third slot.
+* Changing chassis, weapon, armor or reactor, or losing access to the third slot, removes abilities that
+  no longer fit and moves remaining ones back into visible slots, so no ability is left hidden in the
+  mask with no way to remove it.
+* The extra ability uses the existing unit ability bitmask, so unit and savegame layouts are unchanged.
+  Existing units are not given an ability for free, and existing saves gain access as soon as the
+  technologies are known. Designs with three abilities must be edited with this version of Thinker:
+  older builds and the original game may discard the extra ability. Use the same mod version and
+  `third_ability_tech` setting on every multiplayer machine and when continuing a saved game.
+* In single player, discovering or acquiring the third-slot technology shows a popup explaining the new
+  slot.
+* While the extension is enabled, the game also compares complete ability masks when matching an
+  existing prototype, so a requested three-ability design is not silently replaced by an older one- or
+  two-ability design.
+
+### Three-ability AI designs (v5.6)
+* With `design_units=1` the AI uses the same researched slot limit as the player, so it proposes
+  three-ability designs only after the same technologies are known.
+* AI garrisons may add a third defensive ability from the existing list, keeping the Police and Trained
+  checks; long-range artillery ships that already carry AAA gain Deep Radar, radar-equipped interceptors
+  gain Fuel Nanocells on distant or naval fronts, and Super or Fungicidal land formers gain Clean
+  Reactor when support is not free.
+* Production scoring weighs the extra abilities and range against their mineral cost, so the AI does not
+  pay for a third ability it does not need.
+
+### Facilities-only governor (v5.6)
+* The base governor settings have a new **facilities only** priority. While it is selected the governor
+  produces only ordinary base facilities and ignores units, secret projects and orbital satellites.
+* Selecting it clears the four original priorities, since it replaces them instead of combining with
+  them. It applies to player-owned bases managed by Thinker, not to AI bases.
+* When no facility can be built the governor stockpiles energy and checks again every turn, so a facility
+  unlocked by a later technology is started without manual intervention. A manual production queue is
+  still respected, and a non-facility item is replaced rather than left in production.
+* Base hurrying skips anything that is not a facility while this priority is set.
+
+### Targeted forest and fungus former orders (v5.8)
+* A former can be given one of four persistent orders to plant forest or fungus **near its home base**
+  or **globally**, without replacing other improvements.
+* Select one of your formers and press `Ctrl+Shift+P`, or choose **Former forest/fungus orders** from the
+  `Alt+T` menu. The orders also work when Thinker management of other player units is disabled.
+* Home-base orders stay within that base's 21-tile working radius and stop if the base is lost; the
+  former then requests new orders instead of silently switching to global work. Global orders use
+  known, reachable tiles in your own or unclaimed territory and never enter foreign territory.
+* Planting may remove fungus before planting forest, and may replace forest with fungus, but never
+  removes any other improvement. Technologies, terrain restrictions, unit movement type and tile safety
+  are respected, and the former waits and checks again later when there is nothing eligible to do.
+* Waking the former drops the planting order, so it is no longer in planting mode; automating it again
+  selects normal full terraforming. The order is stored in the unit's existing automation field, so
+  use the same mod version on all multiplayer machines and when continuing a saved game.
+
+### Extra map zoom level with PRACX (v5.7, fixed in v5.7.1)
+* When PRACX is active, Thinker inserts one additional map zoom level between PRACX levels 2 and 3.
+  The other six levels keep the scales PRACX provides, and both the zoom keys and the mouse wheel use all
+  seven levels.
+* The extension checks the PRACX build before changing it and leaves an unknown version untouched, so a
+  different PRACX release is never corrupted. Version 5.7.1 fixed this check, which had disabled the new
+  level by misreading relocated PRACX addresses.
+* The seventh level depends on the PRACX 1.11 build bundled with the GOG release (`prax.dll`). Thinker
+  checks that build and extends only it, so any other PRACX release keeps its own zoom levels, unchanged.
+* No message appears in normal play when the level is not added; the reason is written only to the
+  debug log. Six zoom levels instead of seven therefore mean a PRACX version mismatch, not a Thinker bug.
+* Updating PRACX takes precedence: the mod stays on the PRACX version shipped with the GOG release.
+
+### Council and achievement screen scaling (v5.8.1)
+* The Planetary Council vote window and the Planetary Monument achievement screen now scale correctly
+  when a graphics patch such as Longevity Vaccine is installed, instead of opening undersized: Thinker
+  follows the original call site rather than assuming its own internal function is the one the game
+  calls, so the vote buttons, portraits, hitboxes and the achievement plaque scale together.
+
+### New configuration and menu entries (v5.6, v5.8)
+* `third_ability_tech=41` in thinker.ini selects the third-slot prerequisite. `41` is Mind/Machine
+  Interface, any other value is a zero-based technology ID for custom tech trees, and `-1` disables the
+  extension and restores the original two-slot limit and Workshop.
+* The governor settings gain the facilities-only checkbox, and the `Alt+T` menu gains the former
+  forest/fungus orders entry, a former-order dialog and a third-ability notification popup. Extra UI and
+  popup labels are stored in `docs/modmenu.txt`, which must be deployed next to the DLL as usual.
+* The current work text for these units shows the planting order (for example `[Forest near home]`),
+  because the native automation labels have no entry for the new orders.
+
+### Developer additions (v5.6, v5.8, v5.8.1)
+* `tests/` adds standalone logic tests for the ability slots and the former planting orders (built as a
+  separate CMake project, run with ctest), unit tests for the release script, and
+  `tests/check_workshop_patches.py`, which verifies every new binary hook site against an unmodified
+  supported game executable without modifying it. See `tests/README.md`.
+* `tools/build_release.py` builds the DLL and the launcher from current sources with 32-bit MinGW,
+  runs the tests, and writes a versioned release archive with checksums and a manifest describing the
+  source commit, toolchain and validation status. `AGENTS.md` documents that packaging flow and the
+  constraints of the third-ability slot for future contributors.
+
+
 Download
 --------
 These links are the only original source to download binary releases. See also the [Changelog](Changelog.md) for useful release notes.
